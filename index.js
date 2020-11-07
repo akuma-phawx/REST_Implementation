@@ -1,6 +1,7 @@
 const express = require("express");
 const app = express();
 const path = require("path");
+const { v4: uuid } = require("uuid");
 const { emitWarning } = require("process");
 const log = console.log;
 
@@ -8,27 +9,27 @@ app.use(express.urlencoded({ extended: true }));
 
 const comments = [
   {
-    id: 1,
+    id: uuid(),
     username: "Todd",
     comment: "Ewww gross!",
   },
   {
-    id: 2,
+    id: uuid(),
     username: "Helen",
     comment: "Jesus Christ what an awful movie!",
   },
   {
-    id: 3,
+    id: uuid(),
     username: "Benfica",
     comment: "Idinajui....",
   },
   {
-    id: 4,
+    id: uuid(),
     username: "Numas Numas",
     comment: "Vrei sa plezda numa numa numa ei",
   },
   {
-    id: 5,
+    id: uuid(),
     username: "Karoten",
     comment: "Get me shady lady blady ;)",
   },
@@ -54,17 +55,26 @@ app.get("/comments/new", (req, res) => {
 //Create the comment
 app.post("/comments", (req, res) => {
   const { username, comment } = req.body;
-  comments.push({ username, comment });
+  comments.push({ username, comment, id: uuid() });
   res.redirect("/comments");
 });
 
 //Show an individual thing.
 app.get("/comments/:id", (req, res) => {
   const { id } = req.params;
-  const comment = comments.find((c) => c.id === parseInt(id));
+  const comment = comments.find((c) => c.id === id);
   if (comment) {
     res.render("comments/show", { comment });
   } else {
     res.send("Woops not found");
   }
+});
+
+//Update comment
+app.patch("/comments/:id", (req, res) => {
+  const { id } = req.params;
+  const newCommentText = req.body.comment;
+  const foundComment = comments.find((c) => c.id === id);
+  foundComment.comment = newCommentText;
+  res.redirect("/comments");
 });
